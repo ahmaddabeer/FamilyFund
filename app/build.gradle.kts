@@ -6,6 +6,10 @@ plugins {
 
     //DI dependenciy
     id("com.google.dagger.hilt.android")
+
+    id("com.google.gms.google-services")
+
+
 }
 
 android {
@@ -88,4 +92,25 @@ dependencies {
 
 
     implementation("io.coil-kt:coil-compose:2.7.0")
+
+
+
+    //ml kit
+
+    implementation("com.google.mlkit:text-recognition:16.0.1")
+
+
+
+
+    //firebase
+
+
+    implementation(platform("com.google.firebase:firebase-bom:35.2.0"))
+    implementation("com.google.firebase:firebase-database")
+
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.11.0")
+
+
+
 }

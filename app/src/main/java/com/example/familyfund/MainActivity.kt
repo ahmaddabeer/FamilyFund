@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.example.familyfund.presentation.screen.HomeScreen
+import com.example.familyfund.presentation.admin.navigation.NavController
 import com.example.familyfund.presentation.ui.theme.FamilyFundTheme
 
 class MainActivity : ComponentActivity() {
@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             FamilyFundTheme {
 
-                HomeScreen()
+                NavController()
 
             }
         }

@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "930651680209",
+    "firebase_url": "https://bloggerapitest-6ebff-default-rtdb.firebaseio.com",
+    "project_id": "bloggerapitest-6ebff",
+    "storage_bucket": "bloggerapitest-6ebff.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:930651680209:android:9ee5f814ac7387258804f0",
+        "android_client_info": {
+          "package_name": "com.example.familyfund"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfuN1fbsIOQq6IFDuH46b7DgMRo4c394A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:930651680209:android:d440e0a1a4609b648804f0",
+        "android_client_info": {
+          "package_name": "com.example.multiplicationtable"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfuN1fbsIOQq6IFDuH46b7DgMRo4c394A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
