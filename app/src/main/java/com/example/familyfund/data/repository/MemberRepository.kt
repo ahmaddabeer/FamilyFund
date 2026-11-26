@@ -1,7 +1,8 @@
 package com.example.familyfund.data.repository
 
 import android.util.Log
-import com.example.familyfund.data.Member
+import com.example.familyfund.data.model.PaymentRequestModel
+import com.example.familyfund.data.model.MemberModel
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -17,6 +18,8 @@ class MemberRepository {
         .child("members")
 
 
+
+
     suspend fun addMember(name: String, phone: String): String {
 
         val memberRef = memberRef.push()
@@ -25,7 +28,7 @@ class MemberRepository {
             ?: throw Exception("Member Id not generated")
 
 
-        val member = Member(
+        val memberModel = MemberModel(
 
             memberId,
             name,
@@ -37,7 +40,7 @@ class MemberRepository {
 
         )
 
-        memberRef.setValue(member).await()
+        memberRef.setValue(memberModel).await()
 
         return memberId
     }
@@ -62,13 +65,13 @@ class MemberRepository {
 
     }
 
-    suspend fun getMemberById(uid: String): Member? {
+    suspend fun getMemberById(uid: String): MemberModel? {
 
         val snapshot = memberRef.child(uid).get().await()
 
         return if (snapshot.exists()) {
 
-            snapshot.getValue(Member::class.java)
+            snapshot.getValue(MemberModel::class.java)
 
         } else {
 
@@ -77,9 +80,13 @@ class MemberRepository {
     }
 
 
+
+
+
+
     fun getMembers(
 
-        onResult: (List<Member>) -> Unit,
+        onResult: (List<MemberModel>) -> Unit,
         onError: (Exception) -> Unit
     ) {
 
@@ -87,12 +94,12 @@ class MemberRepository {
 
             override fun onDataChange(snapshot: DataSnapshot) {
 
-                val members = snapshot.children.mapNotNull {
+                val memberModels = snapshot.children.mapNotNull {
 
-                    it.getValue(Member::class.java)
+                    it.getValue(MemberModel::class.java)
                 }
 
-                onResult(members)
+                onResult(memberModels)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -105,4 +112,8 @@ class MemberRepository {
 
 
 //    fun updateMember()
+
+
+
+
 }

@@ -8,17 +8,17 @@ sealed class AdminRoute {
 
 
     @Serializable
-    object HomeScreen : AdminRoute()
+    object AdminHomeScreen : AdminRoute()
 
 
     @Serializable
-    object MembersScreen : AdminRoute()
+    object AdminMembersScreen : AdminRoute()
 
 
     @Serializable
-    object PaymentsScreen : AdminRoute()
+    object AdminLoanManagementScreen : AdminRoute()
 
 
     @Serializable
-    object ReportsScreen : AdminRoute()
+    object AdminVarifyPaymentScreen : AdminRoute()
 }

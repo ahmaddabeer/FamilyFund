@@ -41,12 +41,10 @@ import dev.seyfarth.tablericons.TablerIcons
 import dev.seyfarth.tablericons.outlined.ArrowNarrowLeft
 
 @Composable
-fun AddMember(
+fun AdminAddMemberScreen(
 
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-
-
     ) {
 
 
@@ -201,8 +199,7 @@ fun AddMember(
                             onConfirm()
                             Toast.makeText(context, "Member Saved", Toast.LENGTH_SHORT).show()
                             onDismiss()
-                        } else isError =
-                            true
+                        } else isError = true
                     },
                     modifier = Modifier
                         .fillMaxWidth()

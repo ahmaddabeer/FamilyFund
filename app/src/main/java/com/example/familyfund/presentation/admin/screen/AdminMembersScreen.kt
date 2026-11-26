@@ -1,6 +1,10 @@
 package com.example.familyfund.presentation.admin.screen
 
+import android.icu.text.SimpleDateFormat
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,19 +19,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,405 +36,585 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.familyfund.data.Member
-import com.example.familyfund.presentation.admin.component.BottomNavigationBar
+import com.example.familyfund.data.model.MemberModel
+import com.example.familyfund.data.model.PaymentRequestModel
+import com.example.familyfund.presentation.admin.component.AdminBottomNavigationBar
+import com.example.familyfund.presentation.admin.shimmerscreen.AdminMemberScreenUiState
 import com.example.familyfund.presentation.admin.viewmodel.AdminViewModel
+import com.example.familyfund.presentation.shummer.shimmerEffect
 import dev.seyfarth.tablericons.TablerIcons
-import dev.seyfarth.tablericons.outlined.ArrowRight
+import dev.seyfarth.tablericons.outlined.ArrowBadgeLeft
+import dev.seyfarth.tablericons.outlined.ArrowBadgeRight
+import dev.seyfarth.tablericons.outlined.PhoneDone
+import dev.seyfarth.tablericons.outlined.Search
 import dev.seyfarth.tablericons.outlined.UserPlus
-import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MembersScreen(controller: NavController) {
-
-    val months = listOf(
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-    )
-
-    val context = LocalContext.current
-
-
-
-
-
+fun AdminMembersScreen(controller: NavController) {
 
     val viewmode: AdminViewModel = viewModel()
 
+    val adminMemberUiState by viewmode.adminMemberUiState.collectAsStateWithLifecycle()
+
+
+    val availableMonths = viewmode.availableMonths
+
+    var index by remember { mutableStateOf(0) }
+
+    val lastMonth = availableMonths.lastIndex
+
     LaunchedEffect(Unit) {
 
+        viewmode.getAvilableMoths()
+
+    }
+
+
+
+
+
+
+
+
+
+    LaunchedEffect(Unit) {
         viewmode.getAllMember()
-
-
     }
 
     var addMemberScreenActive by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedFilter by remember { mutableStateOf("All") }
 
+    val filters = listOf("All", "Paid", "Pending", "Loan")
 
-    var selecteMonth by remember { mutableStateOf("Jan") }
+    LaunchedEffect(viewmode.filterDate) {
 
+        viewmode.getMonthlyPaymentRecord()
+    }
 
     Scaffold(
-
-
         topBar = {
-
             TopAppBar(
                 title = {
-                    Text("Member")
-                },
-                actions = {
-
-                    IconButton(
-                        onClick = {
-
-
-
-
-
-                        },
-                        shape = RoundedCornerShape(12.dp),
-
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = Color.White
-                        ),
-
-
-                        ) {
-
-                        Icon(
-                            imageVector = TablerIcons.Outlined.UserPlus,
-                            contentDescription = "User Add"
+                    Column {
+                        Text(
+                            text = "Members",
+                            fontFamily = BoldFont,
+                            color = HeadingColor
+                        )
+                        Text(
+                            text = "Manage your family members",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = SecondaryTextColor
                         )
                     }
                 },
-
-                )
-
-
+                actions = {
+                    IconButton(
+                        onClick = { addMemberScreenActive = true },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = SurfaceColor,
+                            contentColor = PrimaryColor
+                        )
+                    ) {
+                        Icon(
+                            imageVector = TablerIcons.Outlined.UserPlus,
+                            contentDescription = "Add Member"
+                        )
+                    }
+                }
+            )
         },
-
         bottomBar = {
-
-            BottomNavigationBar(controller)
+            AdminBottomNavigationBar(controller)
         }
-
     ) { innerPadding ->
-
 
         LazyColumn(
             modifier = Modifier
-                .padding(innerPadding)
-                .padding(12.dp)
+                .fillMaxWidth()
+                .padding(innerPadding),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                horizontal = 16.dp,
+                vertical = 12.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+
+            // Total Members
             item {
-
-
-                Text(
-                    "Monthly Fees Overview",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontFamily = MediumFont,
-                    color = PrimaryTextColor
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                )
-                {
-
-                    Card(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 4.dp),
-                        colors = CardDefaults.cardColors(
-
-                            containerColor = PrimaryColor,
-                            contentColor = Color.White
-
-
-                        )
-
-                    ) {
-
-                        Column(
-                            modifier = Modifier.padding(8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-
-                            Text(
-                                "Total Member",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontFamily = MediumFont,
-
-                                )
-                            Text(
-                                "6", fontFamily = MediumFont,
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
-
-                    }
-                    Card(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 4.dp),
-                        colors = CardDefaults.cardColors(
-
-                            containerColor = PrimaryColor,
-                            contentColor = Color.White
-                        )
-                    ) {
-
-                        Column(
-                            modifier = Modifier.padding(8.dp),
-
-                            verticalArrangement = Arrangement.Center
-                        ) {
-
-                            Text(
-                                " 7 Paid",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontFamily = MediumFont,
-
-                                )
-                            Text(
-                                "6Pending", fontFamily = MediumFont,
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
-
-                    }
-
-
-                }
-
-
-
-
-
-
-
-
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-
-                    val list = listOf("All", "Paid", "Pending")
-                    var selected by remember { mutableStateOf("All") }
-
-                    list.forEach { item ->
-
-                        FilterChip(
-                            selected = selected == item,
-                            onClick = { selected = item },
-                            label = { Text(item) }
-                        )
-                    }
-
-
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-
-
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .background(
+                            SurfaceColor,
+                            RoundedCornerShape(16.dp)
+                        )
+                        .padding(16.dp)
                 ) {
-
                     Text(
-                        "ALL MEMBERS",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = SecondaryTextColor
+                        text = "TOTAL MEMBERS",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = SecondaryTextColor,
+                        fontFamily = MediumFont
                     )
 
+                    Spacer(modifier = Modifier.height(6.dp))
 
-//                    Box(modifier = Modifier.width(50.dp).height if () 12.dp)
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+
+                        when (val state = adminMemberUiState) {
+
+                            is AdminMemberScreenUiState.Loading -> {
+
+                                Box(modifier = Modifier
+                                    .height(30.dp)
+                                    .width(150.dp)
+                                    .shimmerEffect())
+                            }
+
+                            is AdminMemberScreenUiState.Success -> {
+
+                                Text(
+                                    text = state.member.size.toString(),
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontFamily = BoldFont,
+                                    color = HeadingColor
+                                )
+
+                                Text(
+                                    text = "Registered members",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = SecondaryTextColor,
+                                    modifier = Modifier.padding(bottom = 5.dp)
+                                )
+                            }
+
+                            is AdminMemberScreenUiState.Error -> {
+
+
+                            }
+
+                        }
+
+
+                    }
+                }
+            }
+
+            // Search
+            item {
+                androidx.compose.material3.OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = {
+                        Text("Search by name or phone")
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = TablerIcons.Outlined.Search,
+                            contentDescription = "Search"
+                        )
+                    },
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp)
+                )
+            }
+
+            // Filters
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    filters.forEach { filter ->
+                        androidx.compose.material3.FilterChip(
+                            selected = selectedFilter == filter,
+                            onClick = { selectedFilter = filter },
+                            label = { Text(filter) },
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                    }
+                }
+            }
+
+
+
+            when (selectedFilter) {
+
+                "All" -> {
+
+                    // Member List Heading
+                    item {
+                        Text(
+                            text = "Member List",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontFamily = BoldFont,
+                            color = HeadingColor
+                        )
+                    }
+                    when (val state = adminMemberUiState) {
+
+                        is AdminMemberScreenUiState.Loading -> {
+
+                            items(10) {
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(80.dp)
+                                        .shimmerEffect()
+                                )
+
+                            }
+
+
+                        }
+
+                        is AdminMemberScreenUiState.Success -> {
+
+                            if (viewmode.memberModelList.isNotEmpty()) {
+
+                                items(
+                                    items = state.member,
+                                ) { member ->
+
+                                    CardAllMember(member, {})
+                                }
+                            } else {
+
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(200.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+
+                                        Text("No Member")
+                                    }
+                                }
+                            }
+                        }
+
+                        is AdminMemberScreenUiState.Error -> {
+
+                            item {
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(100.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+
+                                    Text(state.message)
+                                }
+                            }
+                        }
+                    }
 
 
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+
+                "Paid" -> {
+
+                    // Member List Heading
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
 
 
+                            IconButton(onClick = {
+
+                                if (index < lastMonth) {
+
+                                    index++
+
+                                    viewmode.onFilterDateChange(availableMonths[index].toLong())
+                                }
+
+
+                            }) {
+                                Icon(
+                                    imageVector = TablerIcons.Outlined.ArrowBadgeLeft,
+                                    contentDescription = "Arrow Left",
+                                    tint = PrimaryColor
+                                )
+                            }
+
+
+                            Text(
+                                text = "${
+                                    SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(
+                                        Date(viewmode.filterDate)
+                                    )
+                                }",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontFamily = BoldFont,
+                                color = HeadingColor
+                            )
+
+                            IconButton(onClick = {
+
+                                if (index > 0) {
+
+                                    index--
+
+                                    viewmode.onFilterDateChange(availableMonths[index].toLong())
+                                }
+
+
+                            }) {
+                                Icon(
+                                    imageVector = TablerIcons.Outlined.ArrowBadgeRight,
+                                    contentDescription = "Arrow Right",
+                                    tint = PrimaryColor
+                                )
+                            }
+
+
+                        }
+                    }
+
+                    when (val state = adminMemberUiState) {
+
+                        is AdminMemberScreenUiState.Loading -> {
+
+                            items(10) {
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(80.dp)
+                                        .shimmerEffect()
+                                )
+
+                            }
+
+                        }
+
+                        is AdminMemberScreenUiState.Success -> {
+
+                            items(
+
+                                items = state.monthlyPayment.filter { it.status == "Complete" }
+                            ) { paymentlist ->
+
+                                CardMontlyPayment(paymentlist, {}, TablerIcons.Outlined.PhoneDone)
+                            }
+                        }
+
+                        is AdminMemberScreenUiState.Error -> {
+
+                            item {
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(150.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+
+                                    Text(state.message)
+                                }
+                            }
+                        }
+                    }
+
+
+                }
             }
 
-           items(
-               items = viewmode.memberList,
-               key = {it.memberId}
-           ) {member->
-
-                CardMember(member)
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                )
-
-
-            }
 
             item {
-
                 Spacer(modifier = Modifier.height(12.dp))
-
-                TextButton(
-                    onClick = {
-
-
-                        addMemberScreenActive = true
-
-
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.textButtonColors(
-
-                        containerColor = PrimaryColor,
-                        contentColor = PrimaryTextColor
-                    )
-                ) {
-
-                    Text("Add Member")
-                }
-
             }
-
-
         }
-
-
     }
-
-//    SearchBar1()
 
     if (addMemberScreenActive) {
-
-
-        AddMember({ addMemberScreenActive = false }, {viewmode.createMember()})
-
-
+        AdminAddMemberScreen(
+            { addMemberScreenActive = false },
+            { viewmode.createMember() }
+        )
     }
-
 }
 
 
 @Composable
-private fun CardMember(member: Member) {
+private fun CardAllMember(
 
+    member: MemberModel,
+    onClick: () -> Unit = {},
 
-
-
+    ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            ,
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .background(
+                Color.White,
+                RoundedCornerShape(14.dp)
+            )
+            .clickable { onClick() }
+            .padding(horizontal = 14.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .background(
+                    SurfaceColor,
+                    CircleShape
+                ),
+            contentAlignment = Alignment.Center
         ) {
-
-            Box(
-                modifier = Modifier
-                    .height(50.dp)
-                    .width(50.dp)
-                    .background(color = BackgroundColor, shape = CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-
-
-                Text(
-                    member.name.firstOrNull()?.uppercase()?: "?",
-                    color = PrimaryColor,
-                    fontFamily = BoldFont,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-
-            }
-
-            Column() {
-
-                Text(
-                    member.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontFamily = MediumFont,
-                    color = PrimaryTextColor
-                )
-                Text(
-                    "Member Fee ${member.monthlyFees}",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontFamily = MediumFont,
-                    color = SecondaryTextColor
-                )
-            }
-        }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-
-
-            Box(
-                modifier = Modifier
-                    .width(40.dp)
-                    .height(25.dp)
-                    .background(Color.Green.copy(0.7f), shape = RoundedCornerShape(8.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-
-                Text(
-                    "Pay",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontFamily = MediumFont,
-                    color = Color.White
-                )
-
-            }
-            Icon(
-                imageVector = TablerIcons.Outlined.ArrowRight,
-                contentDescription = "Arow Right",
-                modifier = Modifier.size(20.dp)
+            Text(
+                text = member.name
+                    .firstOrNull()
+                    ?.uppercase() ?: "?",
+                color = PrimaryColor,
+                fontFamily = BoldFont,
+                style = MaterialTheme.typography.titleMedium
             )
         }
 
+        Spacer(modifier = Modifier.width(12.dp))
 
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = member.name,
+                style = MaterialTheme.typography.titleSmall,
+                fontFamily = BoldFont,
+                color = HeadingColor
+            )
+
+            Text(
+                text = member.phone,
+                style = MaterialTheme.typography.bodySmall,
+                fontFamily = MediumFont,
+                color = SecondaryTextColor
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .background(
+                    BackgroundColor,
+                    CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = TablerIcons.Outlined.ArrowBadgeLeft,
+                contentDescription = "View Details",
+                tint = PrimaryColor,
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
-
-
 }
 
 
-fun formatterDate(date: Long):String{
+@Composable
+private fun CardMontlyPayment(
 
+    paymentlist: PaymentRequestModel,
+    onClick: () -> Unit = {},
+    icon: ImageVector
 
-    return SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(date))
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                Color.White,
+                RoundedCornerShape(14.dp)
+            )
+            .clickable { onClick() }
+            .padding(horizontal = 14.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
 
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .background(
+                    SurfaceColor,
+                    CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = paymentlist.memberName
+                    .firstOrNull()
+                    ?.uppercase() ?: "?",
+                color = PrimaryColor,
+                fontFamily = BoldFont,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
 
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = paymentlist.memberName,
+                style = MaterialTheme.typography.titleSmall,
+                fontFamily = BoldFont,
+                color = HeadingColor
+            )
+
+            Text(
+                text = paymentlist.status,
+                style = MaterialTheme.typography.bodySmall,
+                fontFamily = MediumFont,
+                color = SecondaryTextColor
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .background(
+                    BackgroundColor,
+                    CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = "View Details",
+                tint = PrimaryColor,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+    }
 }
+
 

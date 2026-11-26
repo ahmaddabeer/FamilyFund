@@ -1,4 +1,4 @@
-package com.example.familyfund.presentation.ui.theme
+package com.example.familyfund.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

@@ -4,44 +4,43 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.familyfund.presentation.admin.screen.HomeScreen
-import com.example.familyfund.presentation.admin.screen.MembersScreen
-import com.example.familyfund.presentation.admin.screen.PaymentsScreen
-import com.example.familyfund.presentation.admin.screen.ReportsScreen
+import com.example.familyfund.presentation.admin.screen.AdminHomeScreen
+import com.example.familyfund.presentation.admin.screen.AdminLoanManagementScreen
+import com.example.familyfund.presentation.admin.screen.AdminMembersScreen
+import com.example.familyfund.presentation.admin.screen.AdminVarifyPaymentScreen
 
 @Composable
- fun NavController() {
+fun AdminNavController() {
 
 
-
-     val controller = rememberNavController()
+    val controller = rememberNavController()
 
 
     NavHost(
         navController = controller,
-        startDestination = AdminRoute.HomeScreen
-    ){
+        startDestination = AdminRoute.AdminHomeScreen
+    ) {
 
 
-        composable<AdminRoute.HomeScreen>{
+        composable<AdminRoute.AdminHomeScreen> {
 
-            HomeScreen(controller)
+            AdminHomeScreen(controller)
         }
 
 
-        composable<AdminRoute.ReportsScreen>{
+        composable<AdminRoute.AdminVarifyPaymentScreen> {
 
-            ReportsScreen()
+            AdminVarifyPaymentScreen(controller)
         }
 
-        composable<AdminRoute.MembersScreen>{
+        composable<AdminRoute.AdminMembersScreen> {
 
-            MembersScreen(controller)
+            AdminMembersScreen(controller)
         }
 
-        composable<AdminRoute.PaymentsScreen>{
+        composable<AdminRoute.AdminLoanManagementScreen> {
 
-            PaymentsScreen()
+            AdminLoanManagementScreen(controller)
         }
     }
 

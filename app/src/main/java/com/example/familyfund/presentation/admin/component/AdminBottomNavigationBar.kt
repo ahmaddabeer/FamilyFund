@@ -1,9 +1,11 @@
 package com.example.familyfund.presentation.admin.component
 
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
@@ -13,24 +15,29 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.familyfund.presentation.admin.navigation.AdminRoute
+import com.example.familyfund.presentation.admin.screen.MediumFont
 import com.example.familyfund.presentation.admin.screen.PrimaryColor
 import com.example.familyfund.presentation.admin.screen.SecondaryTextColor
 import dev.seyfarth.tablericons.TablerIcons
 import dev.seyfarth.tablericons.outlined.ChartBarPopular
 import dev.seyfarth.tablericons.outlined.Home
+import dev.seyfarth.tablericons.outlined.Hourglass
+import dev.seyfarth.tablericons.outlined.HourglassHigh
+import dev.seyfarth.tablericons.outlined.LayoutDashboard
+import dev.seyfarth.tablericons.outlined.Users
 import dev.seyfarth.tablericons.outlined.UsersGroup
 import dev.seyfarth.tablericons.outlined.Wallet
 
 @Composable
-fun BottomNavigationBar(controller: NavController) {
+fun AdminBottomNavigationBar(controller: NavController) {
 
 
     val Navigationitem = listOf(
 
-        Item( TablerIcons.Outlined.Home, AdminRoute.HomeScreen),
-        Item( TablerIcons.Outlined.UsersGroup, AdminRoute.MembersScreen),
-        Item( TablerIcons.Outlined.Wallet, AdminRoute.PaymentsScreen),
-        Item(TablerIcons.Outlined.ChartBarPopular, AdminRoute.ReportsScreen)
+        Item( TablerIcons.Outlined.LayoutDashboard,"Home", AdminRoute.AdminHomeScreen),
+        Item( TablerIcons.Outlined.Users, "Members",AdminRoute.AdminMembersScreen),
+        Item( TablerIcons.Outlined.Wallet, "Loans",AdminRoute.AdminLoanManagementScreen),
+        Item(TablerIcons.Outlined.HourglassHigh, "Requests",AdminRoute.AdminVarifyPaymentScreen)
     )
 
 
@@ -50,7 +57,7 @@ fun BottomNavigationBar(controller: NavController) {
 
             NavigationBarItem(
                 selected = isSelected,
-                label = null,
+                label = { Text(item.title, fontFamily = MediumFont,color = if(isSelected)PrimaryColor else SecondaryTextColor) },
                 icon = {
                     Icon(imageVector = item.icon, contentDescription = "", tint = if(isSelected) PrimaryColor else SecondaryTextColor)
 
@@ -91,5 +98,6 @@ data class Item(
 
 
     val icon: ImageVector,
+    val title: String,
     val adminRoute: AdminRoute
 )

@@ -1,6 +1,6 @@
-package com.example.familyfund.data
+package com.example.familyfund.data.model
 
-data class Member(
+data class MemberModel(
 
     val memberId:String = "",
     val name:String = "",
