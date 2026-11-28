@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,6 +27,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,7 +52,9 @@ import com.example.familyfund.presentation.shummer.shimmerEffect
 import dev.seyfarth.tablericons.TablerIcons
 import dev.seyfarth.tablericons.outlined.ArrowBadgeLeft
 import dev.seyfarth.tablericons.outlined.ArrowBadgeRight
-import dev.seyfarth.tablericons.outlined.PhoneDone
+import dev.seyfarth.tablericons.outlined.CalendarCheck
+import dev.seyfarth.tablericons.outlined.ChevronRight
+import dev.seyfarth.tablericons.outlined.MoodSmileBeam
 import dev.seyfarth.tablericons.outlined.Search
 import dev.seyfarth.tablericons.outlined.UserPlus
 import java.util.Date
@@ -180,10 +184,12 @@ fun AdminMembersScreen(controller: NavController) {
 
                             is AdminMemberScreenUiState.Loading -> {
 
-                                Box(modifier = Modifier
-                                    .height(30.dp)
-                                    .width(150.dp)
-                                    .shimmerEffect())
+                                Box(
+                                    modifier = Modifier
+                                        .height(30.dp)
+                                        .width(150.dp)
+                                        .shimmerEffect()
+                                )
                             }
 
                             is AdminMemberScreenUiState.Success -> {
@@ -304,7 +310,18 @@ fun AdminMembersScreen(controller: NavController) {
                                         contentAlignment = Alignment.Center
                                     ) {
 
-                                        Text("No Member")
+
+                                        TextButton(onClick = {addMemberScreenActive = true},
+                                            shape = RoundedCornerShape(12.dp),
+                                            colors = ButtonDefaults.buttonColors(
+
+                                                containerColor = PrimaryColor,
+                                                contentColor = Color.White
+                                            )
+                                            ) {
+                                            Text("Add Member", fontFamily = MediumFont)
+
+                                        }
                                     }
                                 }
                             }
@@ -413,13 +430,190 @@ fun AdminMembersScreen(controller: NavController) {
 
                         is AdminMemberScreenUiState.Success -> {
 
-                            items(
 
-                                items = state.monthlyPayment.filter { it.status == "Complete" }
-                            ) { paymentlist ->
+                            val paid = state.monthlyPayment.filter { it.status == "Complete" }
+                            if (paid.isNotEmpty()) {
 
-                                CardMontlyPayment(paymentlist, {}, TablerIcons.Outlined.PhoneDone)
+                                items(
+
+                                    items = paid
+                                ) { paymentlist ->
+
+                                    CardMontlyPayment(
+                                        paymentlist,
+                                        {},
+                                        TablerIcons.Outlined.CalendarCheck
+                                    )
+                                }
+                            } else {
+
+                                item {
+
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(200.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+
+
+                                        Text(
+                                            "No Activity",
+                                            fontFamily = BoldFont,
+                                            style = MaterialTheme.typography.titleLarge,
+                                            color = SecondaryTextColor
+                                        )
+
+                                    }
+                                }
                             }
+                        }
+
+                        is AdminMemberScreenUiState.Error -> {
+
+                            item {
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(150.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+
+                                    Text(state.message)
+                                }
+                            }
+                        }
+                    }
+
+
+                }
+
+                "Pending" -> {
+
+                    // Member List Heading
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+
+                            IconButton(onClick = {
+
+                                if (index < lastMonth) {
+
+                                    index++
+
+                                    viewmode.onFilterDateChange(availableMonths[index].toLong())
+                                }
+
+
+                            }) {
+                                Icon(
+                                    imageVector = TablerIcons.Outlined.ArrowBadgeLeft,
+                                    contentDescription = "Arrow Left",
+                                    tint = PrimaryColor
+                                )
+                            }
+
+
+                            Text(
+                                text = "${
+                                    SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(
+                                        Date(viewmode.filterDate)
+                                    )
+                                }",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontFamily = BoldFont,
+                                color = HeadingColor
+                            )
+
+                            IconButton(onClick = {
+
+                                if (index > 0) {
+
+                                    index--
+
+                                    viewmode.onFilterDateChange(availableMonths[index].toLong())
+                                }
+
+
+                            }) {
+                                Icon(
+                                    imageVector = TablerIcons.Outlined.ArrowBadgeRight,
+                                    contentDescription = "Arrow Right",
+                                    tint = PrimaryColor
+                                )
+                            }
+
+
+                        }
+                    }
+
+                    when (val state = adminMemberUiState) {
+
+                        is AdminMemberScreenUiState.Loading -> {
+
+                            items(10) {
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(80.dp)
+                                        .shimmerEffect()
+                                )
+
+                            }
+
+                        }
+
+                        is AdminMemberScreenUiState.Success -> {
+
+                            val pending = state.member.filter { member ->
+                                state.monthlyPayment.none { payment ->
+
+                                    payment.memberId == member.memberId
+                                }
+                            }
+
+                            if (pending.isNotEmpty()) {
+
+                                items(
+
+                                    items = pending
+                                ) { paymentlist ->
+
+                                    CardAllMember(paymentlist, {})
+                                }
+
+
+                            } else {
+
+                                item {
+
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(200.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+
+
+                                        Text(
+                                            "No Pending Payment",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            color = SecondaryTextColor,
+                                            fontFamily = BoldFont
+                                        )
+
+
+                                    }
+                                }
+                            }
+
+
                         }
 
                         is AdminMemberScreenUiState.Error -> {
@@ -518,17 +712,10 @@ private fun CardAllMember(
             )
         }
 
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .background(
-                    BackgroundColor,
-                    CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
+        IconButton(onClick = {}) {
+
             Icon(
-                imageVector = TablerIcons.Outlined.ArrowBadgeLeft,
+                imageVector = TablerIcons.Outlined.ChevronRight,
                 contentDescription = "View Details",
                 tint = PrimaryColor,
                 modifier = Modifier.size(18.dp)
@@ -598,20 +785,14 @@ private fun CardMontlyPayment(
             )
         }
 
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .background(
-                    BackgroundColor,
-                    CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
+        IconButton(onClick = {}) {
+
             Icon(
                 imageVector = icon,
                 contentDescription = "View Details",
-                tint = PrimaryColor,
+                tint = GreenColor,
                 modifier = Modifier.size(18.dp)
+
             )
         }
     }

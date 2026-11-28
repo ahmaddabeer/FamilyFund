@@ -73,9 +73,9 @@ val BackgroundColor = Color(0xFFF8FAFC)
 val PrimaryTextColor = Color(0xFF334155)
 val SecondaryTextColor = Color(0xFF94A3B8)
 
-private val CardColor = Color.White
-private val GreenColor = Color(0xFF16A269)
-private val OrangeColor = Color(0xFFEEB42E)
+ val CardColor = Color.White
+ val GreenColor = Color(0xFF16A269)
+val OrangeColor = Color(0xFFEEB42E)
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -287,8 +287,8 @@ fun AdminHomeScreen(controller: NavHostController) {
 
                             ThisMonthCard(
                                 icon = TablerIcons.Outlined.Clock,
-                                type = "Pending",
-                                amount = "03",
+                                type = "Verify",
+                                amount = "${state.allPaymentRecordCurrentMonth.filter { it.status == "Verification in progress." }.count()}",
                                 desc = "Pending to varify",
                                 md = Modifier.weight(1f)
                             )
